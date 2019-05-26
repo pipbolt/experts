@@ -1,8 +1,8 @@
-//+------------------------------------------------------------------+
-//|                                                      ProjectName |
-//|                                      Copyright 2012, CompanyName |
-//|                                       http://www.companyname.net |
-//+------------------------------------------------------------------+
+/**
+ * @copyright 	2019, pipbolt.io
+ * @license	    https://github.com/pipbolt/experts/blob/master/LICENSE
+ */
+
 #property copyright "Copyright 2019, pipbolt.io"
 #property link "https://pipbolt.io"
 #property icon "/include/PipboltFramework/favicon.ico"
