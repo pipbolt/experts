@@ -4,5 +4,9 @@
   "editor.formatOnType": true,
   "files.exclude": {
     "**/*.ex5": true
+  },
+  "files.associations": {
+    "*.mq5": "cpp",
+    "*.mqh": "cpp"
   }
 }
