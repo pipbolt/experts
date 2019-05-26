@@ -1,1 +1,2 @@
 *.ex5
+.vscode/ipch/**
