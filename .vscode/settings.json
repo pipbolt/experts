@@ -1,0 +1,6 @@
+{
+  "git.enabled": true,
+  "files.exclude": {
+    "**/*.ex5": true
+  }
+}
