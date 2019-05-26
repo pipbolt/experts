@@ -1,6 +1,6 @@
 /**
- * @copyright 	2019, pipbolt.io
- * @license	    https://github.com/pipbolt/experts/blob/master/LICENSE
+ * @copyright   2019, pipbolt.io
+ * @license     https://github.com/pipbolt/experts/blob/master/LICENSE
  */
 
 #property copyright "Copyright 2019, pipbolt.io"
