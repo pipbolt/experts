@@ -1,5 +1,7 @@
 {
   "git.enabled": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnType": true,
   "files.exclude": {
     "**/*.ex5": true
   }
