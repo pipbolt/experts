@@ -99,8 +99,6 @@ void CheckForOpen(void)
   // Define bool
   bool openBuy = false, openSell = false;
 
-  Print(RSI.Main(0));
-
   // Buy Entry Strategy
   if (RSI.Main(0) < RSI_Buy_Level)
     openBuy = true;
