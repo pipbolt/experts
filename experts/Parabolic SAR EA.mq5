@@ -7,7 +7,7 @@
 #property link "https://pipbolt.io"
 #property icon "/include/PipboltFramework/favicon.ico"
 #property description "Visit pipbolt.io for more EAs for Metatrader 5."
-#property version "0.001"
+#property version "0.002"
 
 //--- Include the main functions
 #include <PipboltFramework\Params\MainSettings.mqh>
