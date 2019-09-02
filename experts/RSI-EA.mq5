@@ -7,7 +7,7 @@
 #property link "https://pipbolt.io"
 #property icon "/include/PipboltFramework/favicon.ico"
 #property description "Visit pipbolt.io for more EAs for Metatrader 5."
-#property version "0.002"
+#property version "0.003"
 
 //--- Include the main functions
 #include <PipboltFramework\Params\MainSettings.mqh>
@@ -100,11 +100,11 @@ void CheckForOpen(void)
   bool openBuy = false, openSell = false;
 
   // Buy Entry Strategy
-  if (RSI.Main(0) < RSI_Buy_Level)
+  if (RSI.Main(0) <= RSI_Buy_Level && RSI.Main(1) > RSI_Buy_Level)
     openBuy = true;
 
   // Sell Entry Strategy
-  else if (RSI.Main(0) > RSI_Sell_Level)
+  else if (RSI.Main(0) >= RSI_Sell_Level && RSI.Main(1) < RSI_Sell_Level)
     openSell = true;
 
   // Open Positions
