@@ -20,10 +20,11 @@ input string Exit_Strategy = "----------"; // ---------- Exit Strategy ---------
 input bool UseExitStrategy = false;        // Use Exit Strategy
 
 //--- Indicator Settings
-input string Bollinger_Bands = "----------";                // ---------- Bollinber Bands ----------
-input int Bands_Period = 20;                                // Period
-input double Bands_Deviation = 2;                           // Deviation
-input ENUM_APPLIED_PRICE Bands_Applied_Price = PRICE_CLOSE; // Applied Price
+input string Moving_Average = "----------";           // ---------- Moving Average ----------
+input int ma_period = 10;                             // Period
+int ma_shift = 0;                                     // Shift
+input ENUM_MA_METHOD ma_method = MODE_SMA;            // Method
+input ENUM_APPLIED_PRICE applied_price = PRICE_CLOSE; // Applied Price
 
 #include <PipboltFramework\Params\MaFilter.mqh>
 #include <PipboltFramework\Params\BreakEven.mqh>
@@ -31,7 +32,7 @@ input ENUM_APPLIED_PRICE Bands_Applied_Price = PRICE_CLOSE; // Applied Price
 #include <PipboltFramework\Params\TimeFilter.mqh>
 
 //-- Indicators
-CiBollinger BBands;
+CiMA MA;
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -49,7 +50,7 @@ int OnInit(void)
   InitTimerFilter(MagicNumber);
 
   // Indicators
-  BBands.Init(NULL, NULL, Bands_Period, 0, Bands_Deviation, Bands_Applied_Price);
+  MA.Init(ma_period, ma_shift, ma_method, applied_price);
 
   //--- ok
   return (INIT_SUCCEEDED);
@@ -90,20 +91,15 @@ void OnTick(void)
 //+------------------------------------------------------------------+
 void CheckForOpen(void)
 {
-
-  // Define bool
-  bool openBuy = false, openSell = false;
-
-  // Close variable
-  double close = iClose(NULL, NULL, _indicatorShift);
+  // Close prices
+  double close0 = iClose(NULL, NULL, _indicatorShift + 0);
+  double close1 = iClose(NULL, NULL, _indicatorShift + 1);
 
   // Buy Entry Strategy
-  if (close < BBands.Lower(0))
-    openBuy = true;
+  bool openBuy = (close0 > MA.Main(0) && close1 <= MA.Main(1));
 
   // Sell Entry Strategy
-  else if (close > BBands.Upper(0))
-    openSell = true;
+  bool openSell = (close0 < MA.Main(0) && close1 >= MA.Main(1));
 
   // Apply MA Filter
   openBuy = openBuy && MAFilter.Check(DIR_BUY);
@@ -117,17 +113,14 @@ void CheckForOpen(void)
 //+------------------------------------------------------------------+
 void CheckForClose(void)
 {
-  // Define bool
-  bool closeBuy = false, closeSell = false;
-
-  // Close variable
-  double close = iClose(NULL, NULL, _indicatorShift);
+  // Close price
+  double close0 = iClose(NULL, NULL, _indicatorShift + 0);
 
   // Buy Exit Strategy
-  closeBuy = (close > BBands.Upper(0));
+  bool closeBuy = (close0 < MA.Main(0));
 
   // Sell Exit Strategy
-  closeSell = close < BBands.Lower(0);
+  bool closeSell = (close0 > MA.Main(0));
 
   // Close Positions
   Main.CloseByExitStrategy(closeBuy, closeSell);

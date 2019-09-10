@@ -7,7 +7,7 @@
 #property link "https://pipbolt.io"
 #property icon "/include/PipboltFramework/favicon.ico"
 #property description "Visit pipbolt.io for more EAs for Metatrader 5."
-#property version "0.007"
+#property version "0.008"
 
 //--- Include the main functions
 #include <PipboltFramework\Params\MainSettings.mqh>
@@ -24,6 +24,7 @@ input string Parabolic_SAR = "----------"; // ---------- Parabolic SAR ---------
 input double PSAR_Step = 0.02;             // Step
 input double PSAR_Maximum = 0.2;           // Maximum
 
+#include <PipboltFramework\Params\MaFilter.mqh>
 #include <PipboltFramework\Params\BreakEven.mqh>
 #include <PipboltFramework\Params\TrailingStop.mqh>
 #include <PipboltFramework\Params\TimeFilter.mqh>
@@ -39,16 +40,11 @@ int OnInit(void)
   if (!cLicense.CheckLicense() || !Main.OnInitChecks())
     return (INIT_FAILED);
 
-  // Init Main Functions
+  // Init Functions
   InitMainSettings();
-
-  // Init TrailingStop
+  InitMaFilter();
   InitTrailingStop(MagicNumber);
-
-  // Init BreakEven
   InitBreakEven(MagicNumber);
-
-  // Init Timer Filter
   InitTimerFilter(MagicNumber);
 
   // Indicators
@@ -106,6 +102,10 @@ void CheckForOpen(void)
   // Sell Entry Strategy
   else if (PSAR.Main(1) < close1 && PSAR.Main(0) > close0)
     openSell = true;
+
+  // Apply MA Filter
+  openBuy = openBuy && MAFilter.Check(DIR_BUY);
+  openSell = openSell && MAFilter.Check(DIR_SELL);
 
   // Open Positions
   Main.OpenByEntryStrategy(openBuy, openSell);

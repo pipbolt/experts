@@ -7,7 +7,7 @@
 #property link "https://pipbolt.io"
 #property icon "/include/PipboltFramework/favicon.ico"
 #property description "Visit pipbolt.io for more EAs for Metatrader 5."
-#property version "0.007"
+#property version "0.008"
 
 //--- Include the main functions
 #include <PipboltFramework\Params\MainSettings.mqh>
@@ -25,6 +25,7 @@ input int tenkanSen = 9;                           // period of Tenkan-sen
 input int kijunSen = 26;                           // period of Kijun-sen
 input int senkouSpanB = 52;                        // period of Senkou Span B
 
+#include <PipboltFramework\Params\MaFilter.mqh>
 #include <PipboltFramework\Params\BreakEven.mqh>
 #include <PipboltFramework\Params\TrailingStop.mqh>
 #include <PipboltFramework\Params\TimeFilter.mqh>
@@ -36,27 +37,22 @@ CiIchimoku Ichimoku;
 //+------------------------------------------------------------------+
 int OnInit(void)
 {
-    // Checks
-    if (!cLicense.CheckLicense() || !Main.OnInitChecks())
-        return (INIT_FAILED);
+  // Checks
+  if (!cLicense.CheckLicense() || !Main.OnInitChecks())
+    return (INIT_FAILED);
 
-    // Init Main Functions
-    InitMainSettings();
+  // Init Functions
+  InitMainSettings();
+  InitMaFilter();
+  InitTrailingStop(MagicNumber);
+  InitBreakEven(MagicNumber);
+  InitTimerFilter(MagicNumber);
 
-    // Init TrailingStop
-    InitTrailingStop(MagicNumber);
+  // Indicators
+  Ichimoku.Init(NULL, NULL, tenkanSen, kijunSen, senkouSpanB);
 
-    // Init BreakEven
-    InitBreakEven(MagicNumber);
-
-    // Init Timer Filter
-    InitTimerFilter(MagicNumber);
-
-    // Indicators
-    Ichimoku.Init(NULL, NULL, tenkanSen, kijunSen, senkouSpanB);
-
-    //--- ok
-    return (INIT_SUCCEEDED);
+  //--- ok
+  return (INIT_SUCCEEDED);
 }
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
@@ -69,51 +65,55 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick(void)
 {
-    // Checks and Updates
-    if (!Main.OnTickChecksAndUpdates())
-        return;
+  // Checks and Updates
+  if (!Main.OnTickChecksAndUpdates())
+    return;
 
-    //Execute only if a open position exists
-    if (Main.PositionExists())
-    {
-        cTrailingStop.Trail();
-        cBreakEven.Trail();
-        cTimeFilter.ExitOnTimer();
+  //Execute only if a open position exists
+  if (Main.PositionExists())
+  {
+    cTrailingStop.Trail();
+    cBreakEven.Trail();
+    cTimeFilter.ExitOnTimer();
 
-        if (UseExitStrategy && Main.IsNewBar())
-            CheckForClose();
-    }
+    if (UseExitStrategy && Main.IsNewBar())
+      CheckForClose();
+  }
 
-    // Execute only on a new bar
-    if (Main.NewPositionAllowed() && cTimeFilter.TimeFilter() && Main.IsNewBar())
-        CheckForOpen();
+  // Execute only on a new bar
+  if (Main.NewPositionAllowed() && cTimeFilter.TimeFilter() && Main.IsNewBar())
+    CheckForOpen();
 }
 //+------------------------------------------------------------------+
 //| Check for open position conditions                               |
 //+------------------------------------------------------------------+
 void CheckForOpen(void)
 {
-    // Buy Entry Strategy
-    bool openBuy = (Ichimoku.TenkanSen(0) > Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) <= Ichimoku.KijunSen(1));
+  // Buy Entry Strategy
+  bool openBuy = (Ichimoku.TenkanSen(0) > Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) <= Ichimoku.KijunSen(1));
 
-    // Sell Entry Stategy
-    bool openSell = (Ichimoku.TenkanSen(0) < Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) >= Ichimoku.KijunSen(1));
+  // Sell Entry Stategy
+  bool openSell = (Ichimoku.TenkanSen(0) < Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) >= Ichimoku.KijunSen(1));
 
-    // Open Positions
-    Main.OpenByEntryStrategy(openBuy, openSell);
+  // Apply MA Filter
+  openBuy = openBuy && MAFilter.Check(DIR_BUY);
+  openSell = openSell && MAFilter.Check(DIR_SELL);
+
+  // Open Positions
+  Main.OpenByEntryStrategy(openBuy, openSell);
 }
 //+------------------------------------------------------------------+
 //| Check for close position conditions                              |
 //+------------------------------------------------------------------+
 void CheckForClose(void)
 {
-    // Buy Exit Strategy
-    bool closeBuy = (Ichimoku.TenkanSen(0) <= Ichimoku.KijunSen(0));
+  // Buy Exit Strategy
+  bool closeBuy = (Ichimoku.TenkanSen(0) <= Ichimoku.KijunSen(0));
 
-    // Sell Exit Stategy
-    bool closeSell = (Ichimoku.TenkanSen(0) >= Ichimoku.KijunSen(0));
+  // Sell Exit Stategy
+  bool closeSell = (Ichimoku.TenkanSen(0) >= Ichimoku.KijunSen(0));
 
-    // Close Positions
-    Main.CloseByExitStrategy(closeBuy, closeSell);
+  // Close Positions
+  Main.CloseByExitStrategy(closeBuy, closeSell);
 }
 //+------------------------------------------------------------------+
