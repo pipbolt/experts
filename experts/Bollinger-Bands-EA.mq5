@@ -3,11 +3,17 @@
  * @license     https://github.com/pipbolt/experts/blob/master/LICENSE
  */
 
-#property copyright "Copyright 2019, pipbolt.io"
-#property link "https://pipbolt.io"
-#property icon "/include/PipboltFramework/favicon.ico"
-#property description "Visit pipbolt.io for more EAs for Metatrader 5."
-#property version "0.008"
+//--- Include some constants
+#include <PipboltFramework\Constants.mqh>
+
+#define NAME "Bollinger Bands EA"
+#define VERSION "0.008"
+
+#property copyright COPYRIGHT
+#property link LINK
+#property icon ICON
+#property description DESCRIPTION
+#property version VERSION
 
 //--- Include the main functions
 #include <PipboltFramework\Params\MainSettings.mqh>
