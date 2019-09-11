@@ -91,17 +91,11 @@ void OnTick(void)
 //+------------------------------------------------------------------+
 void CheckForOpen(void)
 {
-
-  // Define bool
-  bool openBuy = false, openSell = false;
-
   // Buy Entry Strategy
-  if (RSI.Main(0) <= RSI_Buy_Level && RSI.Main(1) > RSI_Buy_Level)
-    openBuy = true;
+  bool openBuy = (RSI.Main(0) <= RSI_Buy_Level && RSI.Main(1) > RSI_Buy_Level);
 
   // Sell Entry Strategy
-  else if (RSI.Main(0) >= RSI_Sell_Level && RSI.Main(1) < RSI_Sell_Level)
-    openSell = true;
+  bool openSell = (RSI.Main(0) >= RSI_Sell_Level && RSI.Main(1) < RSI_Sell_Level);
 
   // Apply MA Filter
   openBuy = openBuy && MAFilter.Check(DIR_BUY);
