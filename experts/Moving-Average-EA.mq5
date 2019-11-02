@@ -1,5 +1,5 @@
 /**
- * @copyright   2019, pipbolt.io
+ * @copyright   2019, pipbolt.io <beta@pipbolt.io>
  * @license     https://github.com/pipbolt/experts/blob/master/LICENSE
  */
 
@@ -27,7 +27,7 @@ int ma_shift = 0;                                     // Shift
 input ENUM_MA_METHOD ma_method = MODE_SMA;            // Method
 input ENUM_APPLIED_PRICE applied_price = PRICE_CLOSE; // Applied Price
 
-#include <PipboltFramework\Params\MainSettings.mqh>
+#include <PipboltFramework\Experts.mqh>
 
 CiMA MA;
 

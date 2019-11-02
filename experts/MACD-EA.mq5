@@ -1,5 +1,5 @@
 /**
- * @copyright   2019, pipbolt.io
+ * @copyright   2019, pipbolt.io <beta@pipbolt.io>
  * @license     https://github.com/pipbolt/experts/blob/master/LICENSE
  */
 

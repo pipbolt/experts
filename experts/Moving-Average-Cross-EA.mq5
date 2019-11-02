@@ -1,5 +1,5 @@
 /**
- * @copyright   2019, pipbolt.io
+ * @copyright   2019, pipbolt.io <beta@pipbolt.io>
  * @license     https://github.com/pipbolt/experts/blob/master/LICENSE
  */
 
@@ -64,9 +64,6 @@ void CheckForOpen(bool &openBuy, bool &openSell)
 
 void CheckForClose(bool &closeBuy, bool &closeSell)
 {
-  // Define bool
-  bool closeBuy = false, closeSell = false;
-
   // Buy Exit Strategy
   closeBuy = (MAFast.Main(1) > MASlow.Main(1) && MAFast.Main(0) <= MASlow.Main(0));
 
