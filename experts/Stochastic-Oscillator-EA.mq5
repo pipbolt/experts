@@ -3,11 +3,10 @@
  * @license     https://github.com/pipbolt/experts/blob/master/LICENSE
  */
 
-//--- Include some constants
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "Stochastic Oscillator EA"
-#define VERSION "0.008"
+#define VERSION "0.021"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -15,102 +14,42 @@
 #property description DESCRIPTION
 #property version VERSION
 
-//--- Include the main functions
 #include <PipboltFramework\Params\MainSettings.mqh>
 
-//--- Entry Strategy
-input string Entry_Strategy = "----------"; // ---------- Entry Strategy ----------
+input group "Entry Strategy";
 
-//--- Exit Strategy
-input string Exit_Strategy = "----------"; // ---------- Exit Strategy ----------
-input bool UseExitStrategy = false;        // Use Exit Strategy
+input group "Exit Strategy";
+input bool UseExitStrategy = false; // Use Exit Strategy
 
-//--- Indicator Settings
-input string Stochastic_Oscillator = "----------"; // ---------- Stochastic Oscillator ----------
-input int Stoch_KPeriod = 10;                      // %K Period
-input int Stoch_DPeriod = 3;                       // %D Period
-input int Stoch_Slowing = 3;                       // Slowing
-input ENUM_MA_METHOD Stoch_Method = MODE_SMA;      // Method
-input ENUM_STO_PRICE Stoch_Price = STO_LOWHIGH;    // Price
-input int Stoch_Buy_Level = 20;                    // Buy Level
-input int Stoch_Sell_Level = 80;                   // Sell Level
+input group "Stochastic Oscillator";
+input int Stoch_KPeriod = 5;                    // %K Period
+input int Stoch_DPeriod = 3;                    // %D Period
+input int Stoch_Slowing = 3;                    // Slowing
+input ENUM_MA_METHOD Stoch_Method = MODE_SMA;   // Method
+input ENUM_STO_PRICE Stoch_Price = STO_LOWHIGH; // Price
+input int Stoch_Buy_Level = 20;                 // Buy Level
+input int Stoch_Sell_Level = 80;                // Sell Level
 
-#include <PipboltFramework\Params\MaFilter.mqh>
-#include <PipboltFramework\Params\BreakEven.mqh>
-#include <PipboltFramework\Params\TrailingStop.mqh>
-#include <PipboltFramework\Params\TimeFilter.mqh>
+#include <PipboltFramework\Experts.mqh>
 
-//-- Indicators
 CiStochastic Stoch;
-//+------------------------------------------------------------------+
-//| Expert initialization function                                   |
-//+------------------------------------------------------------------+
+
 int OnInit(void)
 {
-  // Checks
-  if (!cLicense.CheckLicense() || !Main.OnInitChecks())
-    return (INIT_FAILED);
+  if (ONINIT() != INIT_SUCCEEDED)
+    return INIT_FAILED;
 
-  // Init Functions
-  InitMainSettings();
-  InitMaFilter();
-  InitTrailingStop(MagicNumber);
-  InitBreakEven(MagicNumber);
-  InitTimerFilter(MagicNumber);
-
-  // Indicators
   Stoch.Init(NULL, NULL, Stoch_KPeriod, Stoch_DPeriod, Stoch_Slowing, Stoch_Method, Stoch_Price);
 
-  //--- ok
-  return (INIT_SUCCEEDED);
+  return INIT_SUCCEEDED;
 }
-//+------------------------------------------------------------------+
-//| Expert deinitialization function                                 |
-//+------------------------------------------------------------------+
-void OnDeinit(const int reason)
+
+void OnTick(void) { ONTICK(); }
+void OnDeinit(const int reason) { ONDEINIT(reason); }
+void OnTimer() { ONTIMER(); }
+
+void CheckForOpen(bool &openBuy, bool &openSell)
 {
-  Main.Deinit();
-}
-//+------------------------------------------------------------------+
-//| Expert timer function                                            |
-//+------------------------------------------------------------------+
-void OnTimer()
-{
-  Main.Timer();
-}
-//+------------------------------------------------------------------+
-//| Expert tick function                                             |
-//+------------------------------------------------------------------+
-void OnTick(void)
-{
-
-  // Checks and Updates
-  if (!Main.OnTickChecksAndUpdates())
-    return;
-
-  //Execute only if a open position exists
-  if (Main.PositionExists())
-  {
-    cTrailingStop.Trail();
-    cBreakEven.Trail();
-    cTimeFilter.ExitOnTimer();
-
-    if (UseExitStrategy && Main.IsNewBar())
-      CheckForClose();
-  }
-
-  // Execute only on a new bar
-  if (Main.NewPositionAllowed() && cTimeFilter.TimeFilter() && Main.IsNewBar())
-    CheckForOpen();
-}
-//+------------------------------------------------------------------+
-//| Check for open position conditions                               |
-//+------------------------------------------------------------------+
-void CheckForOpen(void)
-{
-  // Define bool
-  bool openBuy = false, openSell = false;
-
   // Buy Entry Strategy
   if (Stoch.Signal(1) <= Stoch_Buy_Level && Stoch.Main(1) <= Stoch.Signal(1) &&
       Stoch.Main(0) <= Stoch_Buy_Level && Stoch.Signal(0) <= Stoch.Main(0))
@@ -124,25 +63,13 @@ void CheckForOpen(void)
   // Apply MA Filter
   openBuy = openBuy && MAFilter.Check(DIR_BUY);
   openSell = openSell && MAFilter.Check(DIR_SELL);
-
-  // Open Positions
-  Main.OpenByEntryStrategy(openBuy, openSell);
 }
-//+------------------------------------------------------------------+
-//| Check for close position conditions                              |
-//+------------------------------------------------------------------+
-void CheckForClose(void)
-{
-  // Define bool
-  bool closeBuy = false, closeSell = false;
 
+void CheckForClose(bool &closeBuy, bool &closeSell)
+{
   // Buy Exit Strategy
   closeBuy = (Stoch.Main(0) >= Stoch_Sell_Level);
 
   // Sell Exit Strategy
   closeSell = (Stoch.Main(0) <= Stoch_Buy_Level);
-
-  // Close Positions
-  Main.CloseByExitStrategy(closeBuy, closeSell);
 }
-//+------------------------------------------------------------------+
