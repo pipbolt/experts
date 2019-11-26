@@ -6,7 +6,7 @@
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "RSI EA (Relative Strength Index)"
-#define VERSION "0.021"
+#define VERSION "0.022"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -17,15 +17,21 @@
 #include <PipboltFramework\Params\MainSettings.mqh>
 
 input group "Entry Strategy";
+enum ENUM_ENTRY_STRATEGY
+{
+  BREAK_IN,  // Break In
+  BREAK_OUT, // Break Out
+};
+input ENUM_ENTRY_STRATEGY EntryStrategy = 0; // Entry Strategy
 
 input group "Exit Strategy";
 input bool UseExitStrategy = false; // Use Exit Strategy
 
 input group "Relative Strength Index";
-input int RSI_Period = 14;                                // Period
-input ENUM_APPLIED_PRICE RSI_Applied_Price = PRICE_CLOSE; // Applied Price
-input int RSI_Buy_Level = 30;                             // Buy Level
-input int RSI_Sell_Level = 70;                            // Sell Level
+input int RsiPeriod = 14;                               // Period
+input ENUM_APPLIED_PRICE RsiAppliedPrice = PRICE_CLOSE; // Applied Price
+input int RsiBuyLevel = 30;                             // Buy Level
+input int RsiSellLevel = 70;                            // Sell Level
 
 #include <PipboltFramework\Experts.mqh>
 
@@ -36,7 +42,7 @@ int OnInit(void)
   if (ONINIT() != INIT_SUCCEEDED)
     return INIT_FAILED;
 
-  RSI.Init(NULL, NULL, RSI_Period, RSI_Applied_Price);
+  RSI.Init(NULL, NULL, RsiPeriod, RsiAppliedPrice);
 
   return INIT_SUCCEEDED;
 }
@@ -47,11 +53,18 @@ void OnTimer() { ONTIMER(); }
 
 void CheckForOpen(bool &openBuy, bool &openSell)
 {
-  // Buy Entry Strategy
-  openBuy = (RSI.Main(0) <= RSI_Buy_Level && RSI.Main(1) > RSI_Buy_Level);
-
-  // Sell Entry Strategy
-  openSell = (RSI.Main(0) >= RSI_Sell_Level && RSI.Main(1) < RSI_Sell_Level);
+  // Check Entry Strategy
+  switch (EntryStrategy)
+  {
+  case BREAK_IN:
+    openBuy = RSI.Main(0) <= RsiBuyLevel && RSI.Main(1) > RsiBuyLevel;
+    openSell = RSI.Main(0) >= RsiSellLevel && RSI.Main(1) < RsiSellLevel;
+    break;
+  case BREAK_OUT:
+    openBuy = RSI.Main(0) >= RsiBuyLevel && RSI.Main(1) < RsiBuyLevel;
+    openSell = RSI.Main(0) <= RsiSellLevel && RSI.Main(1) > RsiSellLevel;
+    break;
+  }
 
   // Apply MA Filter
   openBuy = openBuy && MAFilter.Check(DIR_BUY);
@@ -64,8 +77,8 @@ void CheckForClose(bool &closeBuy, bool &closeSell)
   double close = iClose(NULL, NULL, _indicatorShift);
 
   // Buy Exit Strategy
-  closeBuy = RSI.Main(0) > RSI_Sell_Level;
+  closeBuy = RSI.Main(0) > RsiSellLevel;
 
   // Sell Exit Strategy
-  closeSell = (RSI.Main(0) < RSI_Buy_Level);
+  closeSell = RSI.Main(0) < RsiBuyLevel;
 }

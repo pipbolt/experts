@@ -6,7 +6,7 @@
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "Stochastic Oscillator EA"
-#define VERSION "0.021"
+#define VERSION "0.022"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -22,13 +22,13 @@ input group "Exit Strategy";
 input bool UseExitStrategy = false; // Use Exit Strategy
 
 input group "Stochastic Oscillator";
-input int Stoch_KPeriod = 5;                    // %K Period
-input int Stoch_DPeriod = 3;                    // %D Period
-input int Stoch_Slowing = 3;                    // Slowing
-input ENUM_MA_METHOD Stoch_Method = MODE_SMA;   // Method
-input ENUM_STO_PRICE Stoch_Price = STO_LOWHIGH; // Price
-input int Stoch_Buy_Level = 20;                 // Buy Level
-input int Stoch_Sell_Level = 80;                // Sell Level
+input int StochKPeriod = 5;                    // %K Period
+input int StochDPeriod = 3;                    // %D Period
+input int StochSlowing = 3;                    // Slowing
+input ENUM_MA_METHOD StochMethod = MODE_SMA;   // Method
+input ENUM_STO_PRICE StochPrice = STO_LOWHIGH; // Price
+input int StochBuyLevel = 20;                  // Buy Level
+input int StochSellLevel = 80;                 // Sell Level
 
 #include <PipboltFramework\Experts.mqh>
 
@@ -39,7 +39,7 @@ int OnInit(void)
   if (ONINIT() != INIT_SUCCEEDED)
     return INIT_FAILED;
 
-  Stoch.Init(NULL, NULL, Stoch_KPeriod, Stoch_DPeriod, Stoch_Slowing, Stoch_Method, Stoch_Price);
+  Stoch.Init(NULL, NULL, StochKPeriod, StochDPeriod, StochSlowing, StochMethod, StochPrice);
 
   return INIT_SUCCEEDED;
 }
@@ -51,13 +51,13 @@ void OnTimer() { ONTIMER(); }
 void CheckForOpen(bool &openBuy, bool &openSell)
 {
   // Buy Entry Strategy
-  if (Stoch.Signal(1) <= Stoch_Buy_Level && Stoch.Main(1) <= Stoch.Signal(1) &&
-      Stoch.Main(0) <= Stoch_Buy_Level && Stoch.Signal(0) <= Stoch.Main(0))
+  if (Stoch.Signal(1) <= StochBuyLevel && Stoch.Main(1) <= Stoch.Signal(1) &&
+      Stoch.Main(0) <= StochBuyLevel && Stoch.Signal(0) <= Stoch.Main(0))
     openBuy = true;
 
   // Sell Entry Strategy
-  else if (Stoch.Signal(1) >= Stoch_Sell_Level && Stoch.Main(1) >= Stoch.Signal(1) &&
-           Stoch.Main(0) >= Stoch_Sell_Level && Stoch.Signal(0) >= Stoch.Main(0))
+  else if (Stoch.Signal(1) >= StochSellLevel && Stoch.Main(1) >= Stoch.Signal(1) &&
+           Stoch.Main(0) >= StochSellLevel && Stoch.Signal(0) >= Stoch.Main(0))
     openSell = true;
 
   // Apply MA Filter
@@ -68,8 +68,8 @@ void CheckForOpen(bool &openBuy, bool &openSell)
 void CheckForClose(bool &closeBuy, bool &closeSell)
 {
   // Buy Exit Strategy
-  closeBuy = (Stoch.Main(0) >= Stoch_Sell_Level);
+  closeBuy = Stoch.Main(0) >= StochSellLevel;
 
   // Sell Exit Strategy
-  closeSell = (Stoch.Main(0) <= Stoch_Buy_Level);
+  closeSell = Stoch.Main(0) <= StochBuyLevel;
 }

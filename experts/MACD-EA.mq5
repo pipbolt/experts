@@ -6,7 +6,7 @@
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "MACD EA"
-#define VERSION "0.021"
+#define VERSION "0.022"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -17,6 +17,13 @@
 #include <PipboltFramework\Params\MainSettings.mqh>
 
 input group "Entry Strategy";
+enum ENUM_ENTRY_STRATEGY
+{
+  SINGAL_CROSSES_HISTOGRAM, // Signal Line Crosses Histogram
+  HISTOGRAM_CROSSES_ZERO,   // Histogram Crosses Zero Line
+  SIGNAL_CROSSES_ZERO       // Signal Line Crosses Zero Line
+};
+input ENUM_ENTRY_STRATEGY EntryStrategy = 0; // Entry Strategy
 
 input group "Exit Strategy";
 input bool UseExitStrategy = false; // Use Exit Strategy
@@ -47,11 +54,23 @@ void OnTimer() { ONTIMER(); }
 
 void CheckForOpen(bool &openBuy, bool &openSell)
 {
-  // Buy Entry Strategy
-  openBuy = (MACD.Main(0) <= 0 && MACD.Signal(0) < MACD.Main(0) && MACD.Signal(1) >= MACD.Main(1));
 
-  // Sell Entry Strategy
-  openSell = (MACD.Main(0) >= 0 && MACD.Signal(0) > MACD.Main(0) && MACD.Signal(1) <= MACD.Main(1));
+  // Check Entry Strategy
+  switch (EntryStrategy)
+  {
+  case SINGAL_CROSSES_HISTOGRAM:
+    openBuy = MACD.Main(0) <= 0 && MACD.Signal(0) < MACD.Main(0) && MACD.Signal(1) >= MACD.Main(1);
+    openSell = MACD.Main(0) >= 0 && MACD.Signal(0) > MACD.Main(0) && MACD.Signal(1) <= MACD.Main(1);
+    break;
+  case HISTOGRAM_CROSSES_ZERO:
+    openBuy = MACD.Main(0) > 0 && MACD.Main(1) <= 0;
+    openSell = MACD.Main(0) < 0 && MACD.Main(1) >= 0;
+    break;
+  case SIGNAL_CROSSES_ZERO:
+    openBuy = MACD.Signal(0) > 0 && MACD.Signal(1) <= 0;
+    openSell = MACD.Signal(0) < 0 && MACD.Signal(1) >= 0;
+    break;
+  }
 
   // Apply MA Filter
   openBuy = openBuy && MAFilter.Check(DIR_BUY);
@@ -61,8 +80,8 @@ void CheckForOpen(bool &openBuy, bool &openSell)
 void CheckForClose(bool &closeBuy, bool &closeSell)
 {
   // Buy Exit Strategy
-  closeBuy = (MACD.Signal(0) > MACD.Main(0));
+  closeBuy = MACD.Signal(0) > MACD.Main(0);
 
   // Sell Exit Strategy
-  closeSell = (MACD.Signal(0) < MACD.Main(0));
+  closeSell = MACD.Signal(0) < MACD.Main(0);
 }

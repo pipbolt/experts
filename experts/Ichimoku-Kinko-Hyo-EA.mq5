@@ -6,7 +6,7 @@
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "Ichimoku EA"
-#define VERSION "0.021"
+#define VERSION "0.022"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -47,10 +47,10 @@ void OnTimer() { ONTIMER(); }
 void CheckForOpen(bool &openBuy, bool &openSell)
 {
   // Buy Entry Strategy
-  openBuy = (Ichimoku.TenkanSen(0) > Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) <= Ichimoku.KijunSen(1));
+  openBuy = Ichimoku.TenkanSen(0) > Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) <= Ichimoku.KijunSen(1);
 
   // Sell Entry Stategy
-  openSell = (Ichimoku.TenkanSen(0) < Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) >= Ichimoku.KijunSen(1));
+  openSell = Ichimoku.TenkanSen(0) < Ichimoku.KijunSen(0) && Ichimoku.TenkanSen(1) >= Ichimoku.KijunSen(1);
 
   // Apply MA Filter
   openBuy = openBuy && MAFilter.Check(DIR_BUY);
@@ -60,9 +60,9 @@ void CheckForOpen(bool &openBuy, bool &openSell)
 void CheckForClose(bool &closeBuy, bool &closeSell)
 {
   // Buy Exit Strategy
-  closeBuy = (Ichimoku.TenkanSen(0) <= Ichimoku.KijunSen(0));
+  closeBuy = Ichimoku.TenkanSen(0) <= Ichimoku.KijunSen(0);
 
   // Sell Exit Stategy
-  closeSell = (Ichimoku.TenkanSen(0) >= Ichimoku.KijunSen(0));
+  closeSell = Ichimoku.TenkanSen(0) >= Ichimoku.KijunSen(0);
 }
 //+------------------------------------------------------------------+

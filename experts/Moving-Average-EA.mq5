@@ -6,7 +6,7 @@
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "Moving Average EA"
-#define VERSION "0.021"
+#define VERSION "0.022"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -22,10 +22,9 @@ input group "Exit Strategy";
 input bool UseExitStrategy = false; // Use Exit Strategy
 
 input group "Moving Average";
-input int ma_period = 10;                             // Period
-int ma_shift = 0;                                     // Shift
-input ENUM_MA_METHOD ma_method = MODE_SMA;            // Method
-input ENUM_APPLIED_PRICE applied_price = PRICE_CLOSE; // Applied Price
+input int MaPeriod = 10;                               // Period
+input ENUM_MA_METHOD MaMethod = MODE_SMA;              // Method
+input ENUM_APPLIED_PRICE MaAppliedPrice = PRICE_CLOSE; // Applied Price
 
 #include <PipboltFramework\Experts.mqh>
 
@@ -36,7 +35,7 @@ int OnInit(void)
   if (ONINIT() != INIT_SUCCEEDED)
     return INIT_FAILED;
 
-  MA.Init(ma_period, ma_shift, ma_method, applied_price);
+  MA.Init(MaPeriod, 0, MaMethod, MaAppliedPrice);
 
   return INIT_SUCCEEDED;
 }

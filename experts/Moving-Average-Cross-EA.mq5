@@ -6,7 +6,7 @@
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "Moving Average Cross EA"
-#define VERSION "0.021"
+#define VERSION "0.022"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -22,10 +22,16 @@ input group "Exit Strategy";
 input bool UseExitStrategy = false; // Use Exit Strategy
 
 input group "Moving Averages";
-input string Fast_Moving_Average = "----------"; // ---------- Fast Moving Average ----------
-input int MovingPeriodFast = 12;                 // Moving Average Period
-input string Slow_Moving_Average = "----------"; // ---------- Slow Moving Average ----------
-input int MovingPeriodSlow = 30;                 // Moving Average Period
+
+input string Fast_Moving_Average = "----------";           // ---------- Fast Moving Average ----------
+input int MaFastPeriod = 12;                               // Moving Average Period
+input ENUM_MA_METHOD MaFastMethod = MODE_SMA;              // Method
+input ENUM_APPLIED_PRICE MaFastAppliedPrice = PRICE_CLOSE; // Applied Price
+
+input string Slow_Moving_Average = "----------";           // ---------- Slow Moving Average ----------
+input int MaSlowPeriod = 30;                               // Moving Average Period
+input ENUM_MA_METHOD MaSlowMethod = MODE_SMA;              // Method
+input ENUM_APPLIED_PRICE MaSlowAppliedPrice = PRICE_CLOSE; // Applied Price
 
 #include <PipboltFramework\Experts.mqh>
 
@@ -37,8 +43,8 @@ int OnInit(void)
   if (ONINIT() != INIT_SUCCEEDED)
     return INIT_FAILED;
 
-  MAFast.Init(MovingPeriodFast, 0, MODE_SMA, PRICE_CLOSE);
-  MASlow.Init(MovingPeriodSlow, 0, MODE_SMA, PRICE_CLOSE);
+  MAFast.Init(MaFastPeriod, 0, MaFastMethod, MaFastAppliedPrice);
+  MASlow.Init(MaSlowPeriod, 0, MaSlowMethod, MaSlowAppliedPrice);
 
   return INIT_SUCCEEDED;
 }

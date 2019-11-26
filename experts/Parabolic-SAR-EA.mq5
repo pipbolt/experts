@@ -6,7 +6,7 @@
 #include <PipboltFramework\Constants.mqh>
 
 #define NAME "Parabolic SAR EA"
-#define VERSION "0.021"
+#define VERSION "0.022"
 
 #property copyright COPYRIGHT
 #property link LINK
@@ -69,8 +69,8 @@ void CheckForClose(bool &closeBuy, bool &closeSell)
   double close1 = iClose(NULL, NULL, _indicatorShift + 1);
 
   // Buy Exit Strategy
-  closeBuy = (PSAR.Main(0) > close0 && PSAR.Main(1) < close1);
+  closeBuy = PSAR.Main(0) > close0 && PSAR.Main(1) < close1;
 
   // Sell Exit Strategy
-  closeSell = (PSAR.Main(0) < close0 && PSAR.Main(1) > close1);
+  closeSell = PSAR.Main(0) < close0 && PSAR.Main(1) > close1;
 }
